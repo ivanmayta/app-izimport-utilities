@@ -17,7 +17,7 @@ import { ThemedView } from "@/components/ThemedView"
 import { useExchangeRate } from "@/hooks/useExchangeRate"
 import { useThemeColor } from "@/hooks/useThemeColor"
 import AdService from "@/services/AdService"
-import { Feather, Ionicons, MaterialIcons } from "@expo/vector-icons"
+import { Feather, MaterialIcons } from "@expo/vector-icons"
 
 export default function HomeScreen() {
     const navigation = useNavigation()
@@ -171,7 +171,7 @@ export default function HomeScreen() {
                     />
                     <TextInput
                         style={[styles.trackingInput, { color: textColor }]}
-                        placeholder="Buscar envío DHL (ej: 123456789)"
+                        placeholder="ej: 123456789"
                         placeholderTextColor="#999"
                         value={trackingNumber}
                         onChangeText={setTrackingNumber}
@@ -276,7 +276,7 @@ export default function HomeScreen() {
                         fontSize: 16,
                         fontWeight: "600",
                         textAlign: "center",
-                        marginTop: 8,
+                        marginTop: 6,
                     }}
                 >
                     Más servicios
@@ -324,7 +324,7 @@ export default function HomeScreen() {
                     </ThemedView>
                 </TouchableOpacity>
 
-                {/* Card 2: Curso */}
+                {/* Card 2: Curso 
                 <TouchableOpacity
                     style={styles.card}
                     onPress={() => navigation.navigate("Curso" as never)}
@@ -362,7 +362,7 @@ export default function HomeScreen() {
                         </View>
                     </ThemedView>
                 </TouchableOpacity>
-
+                */}
                 {/* Card 3: Biblioteca Virtual */}
                 <TouchableOpacity
                     style={styles.card}
@@ -543,10 +543,7 @@ const styles = StyleSheet.create({
         fontWeight: "500",
         opacity: 0.8,
     },
-    separator: {
-        marginVertical: 20,
-        paddingHorizontal: 20,
-    },
+    separator: {},
     cardTitleContainer: {
         flexDirection: "row",
         alignItems: "center",
@@ -593,6 +590,7 @@ const styles = StyleSheet.create({
         paddingVertical: 8,
         fontSize: 16,
         fontWeight: "500",
+        textAlignVertical: "center",
     },
     trackingButton: {
         backgroundColor: "#FF8C00",
