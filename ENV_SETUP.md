@@ -83,10 +83,24 @@ El AdService ahora usa automáticamente:
 
 -   **Desarrollo**: `TestIds.INTERSTITIAL` (seguro para testing)
 -   **Producción**: Tu Ad Unit ID real desde variables de entorno
+-   **Error si falta**: Lanza excepción clara si no hay variable configurada
 
 ```typescript
 // Configuración actual en AdService.ts
-private readonly adUnitId = __DEV__
-    ? TestIds.INTERSTITIAL
-    : ENV_CONFIG.INTERSTITIAL_AD_UNIT_ID
+private getAdUnitId(): string {
+    if (__DEV__) {
+        return TestIds.INTERSTITIAL
+    }
+
+    const productionAdUnitId = ENV_CONFIG.INTERSTITIAL_AD_UNIT_ID
+    if (!productionAdUnitId) {
+        throw new Error("❌ EXPO_PUBLIC_INTERSTITIAL_AD_UNIT_ID no está configurado")
+    }
+
+    return productionAdUnitId
+}
 ```
+
+### ⚠️ Importante: Sin Fallbacks Peligrosos
+
+Ya NO usamos IDs falsos como `ca-app-pub-xxxxxxxxxxxxx/yyyyyyyyyyyyyy`. Si no hay variable de entorno configurada, la app falla rápido y claro, lo cual es mucho mejor que usar IDs inválidos.

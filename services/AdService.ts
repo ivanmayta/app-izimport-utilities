@@ -21,15 +21,15 @@ class AdService {
         if (__DEV__) {
             return TestIds.INTERSTITIAL
         }
-        
+
         const productionAdUnitId = ENV_CONFIG.INTERSTITIAL_AD_UNIT_ID
         if (!productionAdUnitId) {
             throw new Error(
                 "❌ EXPO_PUBLIC_INTERSTITIAL_AD_UNIT_ID no está configurado. " +
-                "Revisa tu archivo .env o variables de entorno de EAS."
+                    "Revisa tu archivo .env o variables de entorno de EAS."
             )
         }
-        
+
         return productionAdUnitId
     }
 
