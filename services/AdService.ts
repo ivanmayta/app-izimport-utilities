@@ -4,6 +4,7 @@ import {
     InterstitialAd,
     TestIds,
 } from "react-native-google-mobile-ads"
+import ENV_CONFIG from "../config/env"
 
 class AdService {
     private static instance: AdService
@@ -13,11 +14,28 @@ class AdService {
     private readonly STORAGE_KEY = "ad_click_counter"
     private readonly CLICKS_BEFORE_AD = 2
 
+    // Ad Unit ID usando variables de entorno de forma segura
+    private readonly adUnitId = this.getAdUnitId()
+
+    private getAdUnitId(): string {
+        if (__DEV__) {
+            return TestIds.INTERSTITIAL
+        }
+        
+        const productionAdUnitId = ENV_CONFIG.INTERSTITIAL_AD_UNIT_ID
+        if (!productionAdUnitId) {
+            throw new Error(
+                "❌ EXPO_PUBLIC_INTERSTITIAL_AD_UNIT_ID no está configurado. " +
+                "Revisa tu archivo .env o variables de entorno de EAS."
+            )
+        }
+        
+        return productionAdUnitId
+    }
+
     private constructor() {
         // Crear el anuncio una sola vez
-        this.interstitial = InterstitialAd.createForAdRequest(
-            TestIds.INTERSTITIAL
-        )
+        this.interstitial = InterstitialAd.createForAdRequest(this.adUnitId)
         this.setupAdListeners()
         this.loadClickCounter()
         this.loadAd()
