@@ -7,6 +7,7 @@ import {
     View,
 } from "react-native"
 
+import AdBanner from "@/components/AdBanner"
 import { ThemedText } from "@/components/ThemedText"
 import { ThemedView } from "@/components/ThemedView"
 import { useThemeColor } from "@/hooks/useThemeColor"
@@ -258,6 +259,9 @@ export default function SimplificadoScreen() {
                 showsVerticalScrollIndicator={false}
             >
                 <View style={styles.header}>
+                    {/* Banner para SimplificadoScreen */}
+                    <AdBanner />
+
                     <ThemedText style={[styles.subtitle, { color: textColor }]}>
                         Importaciones de $200 a $2000 dólares.
                     </ThemedText>

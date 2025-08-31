@@ -14,9 +14,13 @@
         "android": {
             "adaptiveIcon": {
                 "foregroundImage": "./assets/images/adaptive-icon.png",
-                "backgroundColor": "#ffffff"
+                "backgroundColor": "#ffffff",
+                "enableProguardInReleaseBuilds": true,
+                "extraProguardRules": "-keep class com.google.android.gms.ads.** { *; }"
             },
-            "edgeToEdgeEnabled": true
+            "edgeToEdgeEnabled": true,
+            "permissions": ["com.google.android.gms.permission.AD_ID"],
+            "package": "com.izimport.app"
         },
         "web": {
             "bundler": "metro",
@@ -32,7 +36,21 @@
                     "resizeMode": "contain",
                     "backgroundColor": "#ffffff"
                 }
+            ],
+            "expo-tracking-transparency",
+            "expo-build-properties",
+            [
+                "react-native-google-mobile-ads",
+                {
+                    "androidAppId": "ca-app-pub-9951750194673259~6110385185",
+                    "skAdNetworkItems": []
+                }
             ]
-        ]
+        ],
+        "extra": {
+            "eas": {
+                "projectId": "de3fe4dd-6547-4259-8fc4-e46f9abc4733"
+            }
+        }
     }
 }

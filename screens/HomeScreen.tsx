@@ -1,5 +1,6 @@
 import { useNavigation } from "@react-navigation/native"
 import { Image } from "expo-image"
+import React from "react"
 import {
     ActivityIndicator,
     StyleSheet,
@@ -7,15 +8,34 @@ import {
     View,
 } from "react-native"
 
+import AdBanner from "@/components/AdBanner"
 import ParallaxScrollView from "@/components/ParallaxScrollView"
 import { ThemedText } from "@/components/ThemedText"
 import { ThemedView } from "@/components/ThemedView"
 import { useExchangeRate } from "@/hooks/useExchangeRate"
 import { useThemeColor } from "@/hooks/useThemeColor"
+import AdService from "@/services/AdService"
+import { Feather, Ionicons, MaterialIcons } from "@expo/vector-icons"
 
 export default function HomeScreen() {
     const navigation = useNavigation()
     const { formattedRate, formattedDate, loading, error } = useExchangeRate()
+
+    const handleCalculatePress = async (screenName: string) => {
+        // Registrar click y mostrar anuncio si corresponde
+        const adShown = await AdService.getInstance().onCalculateButtonPressed()
+
+        if (adShown) {
+            console.log(`🎯 Anuncio mostrado antes de navegar a ${screenName}`)
+            // Pequeño delay para que el usuario vea que se está navegando después del anuncio
+            setTimeout(() => {
+                navigation.navigate(screenName as never)
+            }, 500)
+        } else {
+            // Navegar inmediatamente
+            navigation.navigate(screenName as never)
+        }
+    }
 
     // Colores adaptativos al tema
     const textColor = useThemeColor({}, "text")
@@ -128,10 +148,13 @@ export default function HomeScreen() {
                 </ThemedText>
             </ThemedView>
 
+            {/* Banner 1: Debajo de la descripción */}
+            <AdBanner />
+
             <ThemedView style={styles.cardsContainer}>
                 <TouchableOpacity
                     style={styles.card}
-                    onPress={() => navigation.navigate("Exonerado" as never)}
+                    onPress={() => handleCalculatePress("Exonerado")}
                 >
                     <ThemedView
                         style={[
@@ -161,7 +184,7 @@ export default function HomeScreen() {
 
                 <TouchableOpacity
                     style={styles.card}
-                    onPress={() => navigation.navigate("Simplificado" as never)}
+                    onPress={() => handleCalculatePress("Simplificado")}
                 >
                     <ThemedView
                         style={[
@@ -183,6 +206,193 @@ export default function HomeScreen() {
                             <View style={styles.cardButton}>
                                 <ThemedText style={styles.cardButtonText}>
                                     Calcular →
+                                </ThemedText>
+                            </View>
+                        </View>
+                    </ThemedView>
+                </TouchableOpacity>
+            </ThemedView>
+
+            {/* Separador */}
+            <ThemedView style={styles.separator}>
+                <ThemedText
+                    style={{
+                        fontSize: 14,
+                        color: "#757575",
+                        textAlign: "center",
+                    }}
+                >
+                    ───────────────────────────────
+                </ThemedText>
+                <ThemedText
+                    style={{
+                        fontSize: 16,
+                        fontWeight: "600",
+                        textAlign: "center",
+                        marginTop: 8,
+                    }}
+                >
+                    Más servicios
+                </ThemedText>
+            </ThemedView>
+
+            {/* Nuevas Cards */}
+            <ThemedView style={styles.cardsContainer}>
+                {/* Card 1: Vendedores */}
+                <TouchableOpacity
+                    style={styles.card}
+                    onPress={() => navigation.navigate("Vendedores" as never)}
+                >
+                    <ThemedView
+                        style={[
+                            styles.cardContent,
+                            { borderColor: borderColor },
+                        ]}
+                    >
+                        <View style={styles.cardTitleContainer}>
+                            <MaterialIcons
+                                name="storefront"
+                                size={24}
+                                color="#FF8C00"
+                                style={styles.cardIcon}
+                            />
+                            <ThemedText
+                                type="defaultSemiBold"
+                                style={styles.cardTitle}
+                            >
+                                Vende tus productos
+                            </ThemedText>
+                        </View>
+                        <ThemedText style={styles.cardDescription}>
+                            Crea tu tienda online con URL personalizada:
+                            izimport.com/[usuario]
+                        </ThemedText>
+                        <View style={styles.cardButtonContainer}>
+                            <View style={styles.cardButton}>
+                                <ThemedText style={styles.cardButtonText}>
+                                    Comenzar →
+                                </ThemedText>
+                            </View>
+                        </View>
+                    </ThemedView>
+                </TouchableOpacity>
+
+                {/* Card 2: Curso */}
+                <TouchableOpacity
+                    style={styles.card}
+                    onPress={() => navigation.navigate("Curso" as never)}
+                >
+                    <ThemedView
+                        style={[
+                            styles.cardContent,
+                            { borderColor: borderColor },
+                        ]}
+                    >
+                        <View style={styles.cardTitleContainer}>
+                            <Ionicons
+                                name="school"
+                                size={24}
+                                color="#FF8C00"
+                                style={styles.cardIcon}
+                            />
+                            <ThemedText
+                                type="defaultSemiBold"
+                                style={styles.cardTitle}
+                            >
+                                Curso de Importación
+                            </ThemedText>
+                        </View>
+                        <ThemedText style={styles.cardDescription}>
+                            Aprende todo sobre importaciones paso a paso. Para
+                            principiantes y avanzados.
+                        </ThemedText>
+                        <View style={styles.cardButtonContainer}>
+                            <View style={styles.cardButton}>
+                                <ThemedText style={styles.cardButtonText}>
+                                    Ver curso →
+                                </ThemedText>
+                            </View>
+                        </View>
+                    </ThemedView>
+                </TouchableOpacity>
+
+                {/* Card 3: Biblioteca Virtual */}
+                <TouchableOpacity
+                    style={styles.card}
+                    onPress={() => navigation.navigate("Biblioteca" as never)}
+                >
+                    <ThemedView
+                        style={[
+                            styles.cardContent,
+                            { borderColor: borderColor },
+                        ]}
+                    >
+                        <View style={styles.cardTitleContainer}>
+                            <Feather
+                                name="book-open"
+                                size={24}
+                                color="#FF8C00"
+                                style={styles.cardIcon}
+                            />
+                            <ThemedText
+                                type="defaultSemiBold"
+                                style={styles.cardTitle}
+                            >
+                                Biblioteca Virtual
+                            </ThemedText>
+                        </View>
+                        <View style={styles.cardDescriptionContainer}>
+                            <ThemedText style={styles.cardDescription}>
+                                Accede{" "}
+                                <ThemedText style={styles.gratisHighlight}>
+                                    GRATIS
+                                </ThemedText>{" "}
+                                a seminarios, documentos y recursos de comercio
+                                exterior
+                            </ThemedText>
+                        </View>
+                        <View style={styles.cardButtonContainer}>
+                            <View style={styles.cardButton}>
+                                <ThemedText style={styles.cardButtonText}>
+                                    Ver recursos →
+                                </ThemedText>
+                            </View>
+                        </View>
+                    </ThemedView>
+                </TouchableOpacity>
+
+                {/* Card 4: Seguimiento DHL */}
+                <TouchableOpacity
+                    style={styles.card}
+                    onPress={() => navigation.navigate("Seguimiento" as never)}
+                >
+                    <ThemedView
+                        style={[
+                            styles.cardContent,
+                            { borderColor: borderColor },
+                        ]}
+                    >
+                        <View style={styles.cardTitleContainer}>
+                            <MaterialIcons
+                                name="local-shipping"
+                                size={24}
+                                color="#FF8C00"
+                                style={styles.cardIcon}
+                            />
+                            <ThemedText
+                                type="defaultSemiBold"
+                                style={styles.cardTitle}
+                            >
+                                Seguimiento DHL
+                            </ThemedText>
+                        </View>
+                        <ThemedText style={styles.cardDescription}>
+                            Rastrea tus envíos internacionales en tiempo real
+                        </ThemedText>
+                        <View style={styles.cardButtonContainer}>
+                            <View style={styles.cardButton}>
+                                <ThemedText style={styles.cardButtonText}>
+                                    Rastrear →
                                 </ThemedText>
                             </View>
                         </View>
@@ -324,5 +534,29 @@ const styles = StyleSheet.create({
         fontSize: 12,
         fontWeight: "500",
         opacity: 0.8,
+    },
+    separator: {
+        marginVertical: 20,
+        paddingHorizontal: 20,
+    },
+    cardTitleContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        marginBottom: 8,
+    },
+    cardIcon: {
+        marginRight: 8,
+    },
+    cardDescriptionContainer: {
+        marginBottom: 16,
+    },
+    gratisHighlight: {
+        color: "#FFFFFF",
+        fontWeight: "bold",
+        paddingHorizontal: 6,
+        paddingVertical: 2,
+        borderRadius: 4,
+        fontSize: 12,
+        letterSpacing: 0.5,
     },
 })

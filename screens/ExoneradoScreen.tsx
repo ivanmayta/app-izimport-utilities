@@ -7,6 +7,7 @@ import {
     View,
 } from "react-native"
 
+import AdBanner from "@/components/AdBanner"
 import { ThemedText } from "@/components/ThemedText"
 import { ThemedView } from "@/components/ThemedView"
 import { useThemeColor } from "@/hooks/useThemeColor"
@@ -227,6 +228,9 @@ export default function ExoneradoScreen() {
                 showsVerticalScrollIndicator={false}
             >
                 <View style={styles.header}>
+                    {/* Banner para ExoneradoScreen */}
+                    <AdBanner />
+
                     <ThemedText style={[styles.subtitle, { color: textColor }]}>
                         Importaciones de hasta $200 dólares.
                     </ThemedText>
