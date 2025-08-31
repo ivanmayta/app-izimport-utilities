@@ -1,9 +1,11 @@
 import { useNavigation } from "@react-navigation/native"
 import { Image } from "expo-image"
-import React from "react"
+import React, { useState } from "react"
 import {
     ActivityIndicator,
+    Alert,
     StyleSheet,
+    TextInput,
     TouchableOpacity,
     View,
 } from "react-native"
@@ -20,6 +22,7 @@ import { Feather, Ionicons, MaterialIcons } from "@expo/vector-icons"
 export default function HomeScreen() {
     const navigation = useNavigation()
     const { formattedRate, formattedDate, loading, error } = useExchangeRate()
+    const [trackingNumber, setTrackingNumber] = useState("")
 
     const handleCalculatePress = async (screenName: string) => {
         // Registrar click y mostrar anuncio si corresponde
@@ -35,6 +38,18 @@ export default function HomeScreen() {
             // Navegar inmediatamente
             navigation.navigate(screenName as never)
         }
+    }
+
+    const handleTrackShipment = () => {
+        if (!trackingNumber.trim()) {
+            Alert.alert("Error", "Por favor ingresa un número de seguimiento")
+            return
+        }
+
+        // Navegar a la pantalla de seguimiento con el número
+        ;(navigation as any).navigate("Seguimiento", {
+            trackingNumber: trackingNumber.trim(),
+        })
     }
 
     // Colores adaptativos al tema
@@ -139,6 +154,38 @@ export default function HomeScreen() {
                     >
                         / utilidades
                     </ThemedText>
+                </View>
+            </ThemedView>
+
+            {/* Input de seguimiento DHL */}
+            <ThemedView style={styles.trackingContainer}>
+                <ThemedText style={styles.trackingDescription}>
+                    Rastrea tus envíos realizados por DHL
+                </ThemedText>
+                <View style={[styles.trackingInputContainer, { borderColor }]}>
+                    <MaterialIcons
+                        name="local-shipping"
+                        size={20}
+                        color="#FF8C00"
+                        style={styles.trackingIcon}
+                    />
+                    <TextInput
+                        style={[styles.trackingInput, { color: textColor }]}
+                        placeholder="Buscar envío DHL (ej: 123456789)"
+                        placeholderTextColor="#999"
+                        value={trackingNumber}
+                        onChangeText={setTrackingNumber}
+                        autoCapitalize="characters"
+                        autoCorrect={false}
+                        returnKeyType="search"
+                        onSubmitEditing={handleTrackShipment}
+                    />
+                    <TouchableOpacity
+                        style={styles.trackingButton}
+                        onPress={handleTrackShipment}
+                    >
+                        <MaterialIcons name="search" size={20} color="#fff" />
+                    </TouchableOpacity>
                 </View>
             </ThemedView>
 
@@ -360,44 +407,6 @@ export default function HomeScreen() {
                         </View>
                     </ThemedView>
                 </TouchableOpacity>
-
-                {/* Card 4: Seguimiento DHL */}
-                <TouchableOpacity
-                    style={styles.card}
-                    onPress={() => navigation.navigate("Seguimiento" as never)}
-                >
-                    <ThemedView
-                        style={[
-                            styles.cardContent,
-                            { borderColor: borderColor },
-                        ]}
-                    >
-                        <View style={styles.cardTitleContainer}>
-                            <MaterialIcons
-                                name="local-shipping"
-                                size={24}
-                                color="#FF8C00"
-                                style={styles.cardIcon}
-                            />
-                            <ThemedText
-                                type="defaultSemiBold"
-                                style={styles.cardTitle}
-                            >
-                                Seguimiento DHL
-                            </ThemedText>
-                        </View>
-                        <ThemedText style={styles.cardDescription}>
-                            Rastrea tus envíos internacionales en tiempo real
-                        </ThemedText>
-                        <View style={styles.cardButtonContainer}>
-                            <View style={styles.cardButton}>
-                                <ThemedText style={styles.cardButtonText}>
-                                    Rastrear →
-                                </ThemedText>
-                            </View>
-                        </View>
-                    </ThemedView>
-                </TouchableOpacity>
             </ThemedView>
         </ParallaxScrollView>
     )
@@ -499,7 +508,6 @@ const styles = StyleSheet.create({
     },
     stepContainer: {
         gap: 8,
-        marginBottom: 16,
     },
     cardsContainer: {
         gap: 12,
@@ -558,5 +566,39 @@ const styles = StyleSheet.create({
         borderRadius: 4,
         fontSize: 12,
         letterSpacing: 0.5,
+    },
+    trackingContainer: {
+        paddingVertical: 8,
+    },
+    trackingDescription: {
+        fontSize: 14,
+        color: "#757575",
+        marginBottom: 8,
+    },
+    trackingInputContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        borderWidth: 1,
+        paddingLeft: 8,
+        borderRadius: 12,
+        paddingVertical: 1,
+        backgroundColor: "transparent",
+        overflow: "hidden",
+    },
+    trackingIcon: {
+        marginRight: 8,
+    },
+    trackingInput: {
+        flex: 1,
+        paddingVertical: 8,
+        fontSize: 16,
+        fontWeight: "500",
+    },
+    trackingButton: {
+        backgroundColor: "#FF8C00",
+        padding: 12,
+        alignItems: "center",
+        justifyContent: "center",
+        minWidth: 40,
     },
 })

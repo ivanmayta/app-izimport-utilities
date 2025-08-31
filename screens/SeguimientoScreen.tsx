@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useCallback, useEffect, useState } from "react"
 import {
     ActivityIndicator,
     Alert,
@@ -113,8 +113,14 @@ interface ApiResponse {
     lastUrl?: string
 }
 
-export default function SeguimientoScreen() {
-    const [trackingNumber, setTrackingNumber] = useState("")
+export default function SeguimientoScreen({
+    route,
+}: {
+    route?: { params?: { trackingNumber?: string } }
+}) {
+    const [trackingNumber, setTrackingNumber] = useState(
+        route?.params?.trackingNumber || ""
+    )
     const [loading, setLoading] = useState(false)
     const [shipmentData, setShipmentData] = useState<Shipment | null>(null)
     const [error, setError] = useState<string | null>(null)
@@ -133,6 +139,10 @@ export default function SeguimientoScreen() {
     const API_BASE_URL = "https://izimport.com"
 
     const getCountryName = (countryCode?: string): string | null => {
+        if (!countryCode || typeof countryCode !== "string") {
+            return null
+        }
+
         const countryNames: { [key: string]: string } = {
             GB: "Reino Unido",
             US: "Estados Unidos",
@@ -179,10 +189,11 @@ export default function SeguimientoScreen() {
             LU: "Luxemburgo",
         }
 
-        return countryCode ? countryNames[countryCode] || countryCode : null
+        const upperCode = countryCode.toUpperCase()
+        return countryNames[upperCode] || countryCode
     }
 
-    const handleTrackShipment = async () => {
+    const handleTrackShipment = useCallback(async () => {
         if (!trackingNumber.trim()) {
             Alert.alert("Error", "Por favor ingresa un número de seguimiento")
             return
@@ -235,7 +246,7 @@ export default function SeguimientoScreen() {
         } finally {
             setLoading(false)
         }
-    }
+    }, [trackingNumber])
 
     const handleRefresh = () => {
         if (shipmentData && trackingNumber) {
@@ -244,17 +255,86 @@ export default function SeguimientoScreen() {
     }
 
     const formatDate = (timestamp: string) => {
-        const date = new Date(timestamp)
-        return date.toLocaleString("es-ES", {
-            weekday: "long",
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-            hour: "numeric",
-            minute: "2-digit",
-            hour12: true,
-            timeZoneName: "short",
-        })
+        try {
+            if (!timestamp) return "Fecha no disponible"
+
+            const date = new Date(timestamp)
+
+            // Verificar si la fecha es válida
+            if (isNaN(date.getTime())) {
+                return "Fecha inválida"
+            }
+
+            return date.toLocaleString("es-ES", {
+                weekday: "long",
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+                hour: "numeric",
+                minute: "2-digit",
+                hour12: true,
+                timeZoneName: "short",
+            })
+        } catch (error) {
+            console.warn("Error formateando fecha:", error)
+            return "Error al formatear fecha"
+        }
+    }
+
+    // Buscar automáticamente solo al montar el componente si llega con un número
+    useEffect(() => {
+        const initialTrackingNumber = route?.params?.trackingNumber
+        if (initialTrackingNumber && initialTrackingNumber.trim()) {
+            // Llamar la función de búsqueda directamente con el número inicial
+            handleInitialSearch(initialTrackingNumber.trim())
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []) // Solo ejecutar una vez al montar, sin dependencias para evitar búsquedas repetidas
+
+    const handleInitialSearch = async (number: string) => {
+        setLoading(true)
+        setError(null)
+        setShipmentData(null)
+
+        try {
+            const response = await fetch(
+                `${API_BASE_URL}/api/shipment?trackingNumber=${encodeURIComponent(
+                    number
+                )}`
+            )
+
+            if (!response.ok) {
+                if (response.status === 404) {
+                    throw new Error("Número de seguimiento no encontrado")
+                } else if (response.status >= 500) {
+                    throw new Error("Error del servidor. Intenta más tarde")
+                } else {
+                    throw new Error(`Error HTTP: ${response.status}`)
+                }
+            }
+
+            const data: ApiResponse = await response.json()
+
+            if (!data.shipments || data.shipments.length === 0) {
+                throw new Error(
+                    "No se encontraron datos para este número de seguimiento"
+                )
+            }
+
+            const shipment = data.shipments[0]
+            setShipmentData(shipment)
+        } catch (error) {
+            console.error("Error al rastrear envío:", error)
+
+            let errorMessage = "Error desconocido"
+            if (error instanceof Error) {
+                errorMessage = error.message
+            }
+
+            setError(errorMessage)
+        } finally {
+            setLoading(false)
+        }
     }
 
     return (
@@ -348,14 +428,17 @@ export default function SeguimientoScreen() {
                                             { color: textColor },
                                         ]}
                                     >
-                                        {shipmentData.status.status ||
-                                            shipmentData.status.description}
+                                        {shipmentData.status?.status ||
+                                            shipmentData.status?.description ||
+                                            "Estado desconocido"}
                                     </ThemedText>
                                     <ThemedText style={styles.trackingCode}>
                                         Código de Rastreo:{" "}
-                                        {shipmentData.id.split("").join(" ")}
+                                        {shipmentData.id
+                                            ?.split?.("")
+                                            .join(" ") || "N/A"}
                                     </ThemedText>
-                                    {shipmentData.status.timestamp && (
+                                    {shipmentData.status?.timestamp && (
                                         <ThemedText style={styles.statusDate}>
                                             {formatDate(
                                                 shipmentData.status.timestamp
@@ -375,7 +458,6 @@ export default function SeguimientoScreen() {
                                         size={16}
                                         color={textColor}
                                     />
-                                    
                                 </TouchableOpacity>
                             </View>
 
@@ -600,66 +682,85 @@ export default function SeguimientoScreen() {
                             </ThemedText>
 
                             <View style={styles.timeline}>
-                                {shipmentData.events.map((event, index) => (
-                                    <View
-                                        key={index}
-                                        style={styles.timelineItem}
-                                    >
-                                        <View style={styles.timelineIndicator}>
+                                {(shipmentData.events || []).map(
+                                    (event, index) => (
+                                        <View
+                                            key={index}
+                                            style={styles.timelineItem}
+                                        >
                                             <View
-                                                style={[
-                                                    styles.timelineDot,
-                                                    index === 0 &&
-                                                        styles.timelineDotActive,
-                                                ]}
+                                                style={styles.timelineIndicator}
                                             >
-                                                <MaterialIcons
-                                                    name="local-shipping"
-                                                    size={16}
-                                                    color={
-                                                        index === 0
-                                                            ? "#fff"
-                                                            : "#666"
-                                                    }
-                                                />
-                                            </View>
-                                            {index <
-                                                shipmentData.events.length -
-                                                    1 && (
                                                 <View
-                                                    style={styles.timelineLine}
-                                                />
-                                            )}
-                                        </View>
-                                        <View style={styles.timelineContent}>
-                                            <ThemedText
-                                                style={[
-                                                    styles.eventDescription,
-                                                    { color: textColor },
-                                                ]}
-                                            >
-                                                {event.description}
-                                            </ThemedText>
-                                            <ThemedText
-                                                style={styles.eventTimestamp}
-                                            >
-                                                {formatDate(event.timestamp)}
-                                            </ThemedText>
-                                            {event.location?.address
-                                                ?.addressLocality && (
-                                                <ThemedText
-                                                    style={styles.eventLocation}
+                                                    style={[
+                                                        styles.timelineDot,
+                                                        index === 0 &&
+                                                            styles.timelineDotActive,
+                                                    ]}
                                                 >
-                                                    📍{" "}
-                                                    {
-                                                        event.location.address
-                                                            .addressLocality
-                                                    }
+                                                    <MaterialIcons
+                                                        name="local-shipping"
+                                                        size={16}
+                                                        color={
+                                                            index === 0
+                                                                ? "#fff"
+                                                                : "#666"
+                                                        }
+                                                    />
+                                                </View>
+                                                {index <
+                                                    (shipmentData.events
+                                                        ?.length || 1) -
+                                                        1 && (
+                                                    <View
+                                                        style={
+                                                            styles.timelineLine
+                                                        }
+                                                    />
+                                                )}
+                                            </View>
+                                            <View
+                                                style={styles.timelineContent}
+                                            >
+                                                <ThemedText
+                                                    style={[
+                                                        styles.eventDescription,
+                                                        { color: textColor },
+                                                    ]}
+                                                >
+                                                    {event?.description ||
+                                                        "Evento sin descripción"}
                                                 </ThemedText>
-                                            )}
+                                                {event?.timestamp && (
+                                                    <ThemedText
+                                                        style={
+                                                            styles.eventTimestamp
+                                                        }
+                                                    >
+                                                        {formatDate(
+                                                            event.timestamp
+                                                        )}
+                                                    </ThemedText>
+                                                )}
+                                                {event?.location?.address
+                                                    ?.addressLocality && (
+                                                    <ThemedText
+                                                        style={
+                                                            styles.eventLocation
+                                                        }
+                                                    >
+                                                        📍{" "}
+                                                        {
+                                                            event.location
+                                                                .address
+                                                                .addressLocality
+                                                        }
+                                                    </ThemedText>
+                                                )}
+                                            </View>
                                         </View>
-                                    </View>
-                                ))}
+                                    )
+                                )}
                             </View>
                         </View>
                     </>
