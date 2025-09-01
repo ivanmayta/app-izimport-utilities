@@ -1,3 +1,4 @@
+import ENV_CONFIG from "@/config/env"
 import React from "react"
 import { StyleSheet, View } from "react-native"
 import { BannerAd, BannerAdSize, TestIds } from "react-native-google-mobile-ads"
@@ -7,7 +8,23 @@ interface AdBannerProps {
 }
 
 const AdBanner: React.FC<AdBannerProps> = ({ style }) => {
-    const adUnitId = TestIds.BANNER // Usar Test ID para banners
+    const getBannerAdUnitId = (): string => {
+        if (__DEV__) {
+            return TestIds.BANNER
+        }
+
+        const productionBannerAdUnitId = ENV_CONFIG.BANNER_AD_UNIT_ID
+        if (!productionBannerAdUnitId) {
+            throw new Error(
+                "❌ EXPO_PUBLIC_BANNER_AD_UNIT_ID no está configurado. " +
+                    "Revisa tu archivo .env o variables de entorno de EAS."
+            )
+        }
+
+        return productionBannerAdUnitId
+    }
+
+    const adUnitId = getBannerAdUnitId()
 
     return (
         <View style={[styles.container, style]}>

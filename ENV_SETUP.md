@@ -15,7 +15,7 @@ Crea un archivo `.env` en la raíz del proyecto con el siguiente contenido:
 # Ad Unit ID para anuncios intersticiales
 EXPO_PUBLIC_INTERSTITIAL_AD_UNIT_ID=ca-app-pub-xxxxxxxxxxxxx/yyyyyyyyyyyyyy
 
-# Ad Unit ID para banners (si los usas en el futuro)
+# Ad Unit ID para banners (NECESARIO - se usan en todas las pantallas)
 EXPO_PUBLIC_BANNER_AD_UNIT_ID=ca-app-pub-xxxxxxxxxxxxx/zzzzzzzzzzzzzz
 ```
 
@@ -104,3 +104,9 @@ private getAdUnitId(): string {
 ### ⚠️ Importante: Sin Fallbacks Peligrosos
 
 Ya NO usamos IDs falsos como `ca-app-pub-xxxxxxxxxxxxx/yyyyyyyyyyyyyy`. Si no hay variable de entorno configurada, la app falla rápido y claro, lo cual es mucho mejor que usar IDs inválidos.
+
+### 📱 Ads Configurados en tu App
+
+-   **Intersticiales**: Se muestran cada 2 clicks en el botón calcular (AdService)
+-   **Banners**: Se muestran en TODAS las pantallas (HomeScreen, BibliotecaScreen, CursoScreen, etc.)
+-   **Ambos tipos** ahora usan variables de entorno correctamente

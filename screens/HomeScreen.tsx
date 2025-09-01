@@ -114,11 +114,12 @@ export default function HomeScreen() {
 
                         <View style={styles.fixedInfoSection}>
                             <View style={styles.fixedExchangeTypeContainer}>
-                                <ThemedText
+                                <MaterialIcons
+                                    name="currency-exchange"
+                                    size={20}
+                                    color="#ffffff"
                                     style={styles.fixedExchangeTypeIcon}
-                                >
-                                    💰
-                                </ThemedText>
+                                />
                                 <ThemedText
                                     style={styles.fixedExchangeTypeText}
                                 >
